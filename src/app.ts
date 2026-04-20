@@ -6,4 +6,8 @@ dotenv.config();
 
 const app = express();
 
+app.get('/api/users', (req, res) => {
+    
+})
+
 export default app;
