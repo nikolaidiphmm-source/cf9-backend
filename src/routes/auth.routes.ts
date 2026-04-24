@@ -3,6 +3,29 @@ import * as authCtrl from '../controller/auth.controller';
 
 const router = Router();
 
+/**
+ * @openapi
+ * /auth/login:
+ *  post:
+ *      summary: User login
+ *      tags: [Auth]
+ *      requestBody:
+ *          required: true
+ *          content: 
+ *              application/json: 
+ *                  schema: 
+ *                      type: object
+ *                      properties:
+ *                          username: 
+ *                              type: string
+ *                          password:
+ *                              type: string
+ *      responses:
+ *          200:
+ *              description: User logged in
+ *          401:
+ *              description: Invalid credentials
+ */
 router.post('/login', authCtrl.login);
 
 export default router;
