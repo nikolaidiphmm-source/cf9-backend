@@ -65,5 +65,21 @@ describe('User API Tests', () => {
         .send(({username: 'user2', password: "1234"}));
 
         expect(res.status).toBe(400);
-    })
+    });
+
+    test('POST /users -> create user with wrong username', async() => {
+        const res = await server.request.post('/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send(({username: 'us', password: "123456"}));
+
+        expect(res.status).toBe(400);
+    });
+
+     test('POST /users -> create user that exists', async() => {
+        const res = await server.request.post('/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send(({username: 'User1', password: "123456"}));
+
+        expect(res.status).not.toBe(201);
+    });
 });
