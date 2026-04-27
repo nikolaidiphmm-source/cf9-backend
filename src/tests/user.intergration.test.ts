@@ -13,19 +13,57 @@ const JWT_SECRET = process.env.JWT_SECRET || 'test_secret';
 const server = new TestServer();
 server.app.use('/users', userRouter);
 
+let token: string;
+
 describe('User API Tests', () => {
+    let token: string;
+
     beforeAll(async() => {
         await server.start();
         const hash = await bcrypt.hash("123456", 10);
-        const user = User.create({username: "testUser", password: hash, roles: []});
-        const payload = { username: user.username, email: user.email, roles: user.roles }
+        const user = await User.create({
+            username: "testUser", 
+            password: hash, 
+            email: "testUser@aueb.gr", 
+            roles: []});
+        const payload = { 
+            username: user.username, 
+            email: user.email, 
+            roles: [{
+                role: "READER",
+                description: "Default Role",
+                active: true
+            }] 
+        };
+        console.log("PAYLOAD>>>", payload);
         token = jwt.sign(payload, JWT_SECRET, {expiresIn: '1h'});
     });
-    // afterAll(async() => {
-    //     await server.stop()
-    // });
+    afterAll(async() => {
+        await server.stop()
+    });
 
     test("GET /users -> return all users", async() => {
+        const res =await server.request.get('/users');
+        console.log(res.status, res.body);
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+    });
 
+    test('POST /users -> creates a user', async() => {
+        const res = await server.request.post('/users')
+            .set('Authorization', `Bearer ${token}`)
+            .send({username: 'User1', password: "123456"});
+
+        console.log("POST>>>>>>", res.status, res.body);
+        expect(res.status).toBe(201);
+        expect(res.body.status).toBe(true);
+    })
+
+    test('POST /users -> create user with wrong password', async() => {
+        const res = await server.request.post('/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send(({username: 'user2', password: "1234"}));
+
+        expect(res.status).toBe(400);
     })
 });
